@@ -17,5 +17,5 @@ How it works:
   Any dead cell with exactly 3 neighbors becomes alive.
 
   How to use:
-  Build from the source code in the "src" directory yourself, or download the 
+  Build from the source code in the "src" directory yourself, or download the release build.zip.
 
