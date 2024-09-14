@@ -18,6 +18,10 @@ The Game of Life is a cellular automaton where cells evolve based on the number 
   Any live cell with 2 or 3 neighbors lives on to the next generation.<br/>
   Any dead cell with exactly 3 neighbors becomes alive.<br/>
 
-  **How to use**: <br/>
-  Build from the source code yourself, or download the build.zip.
+  **How to run**: <br/>
+ 1. Download "build.zip" from releases.<br/>
+ 2. Extract into a selected folder.<br/>
+ 3. Run GOL.exe .
+ 
+ 
 
