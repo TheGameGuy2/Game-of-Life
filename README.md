@@ -16,3 +16,6 @@ How it works:
   Any live cell with 2 or 3 neighbors lives on to the next generation.
   Any dead cell with exactly 3 neighbors becomes alive.
 
+  How to use:
+  Build from the source code in the "src" directory yourself, or download the 
+
