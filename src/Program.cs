@@ -6,10 +6,12 @@ namespace Main
 {
     class Timer
     {
-        float currentTime;
-        float maxTime;
+        private float currentTime;
+        private float maxTime;
+
         public bool doRestart;
         public bool pause = false;
+        
         public Timer(float timeS,bool restart=false)
         {
             maxTime = timeS;
@@ -50,7 +52,7 @@ namespace Main
                 return true;
             }
             
-            currentTime -=deltaTime;
+            currentTime -= deltaTime;
             return false;
         }
 
@@ -67,18 +69,18 @@ namespace Main
         public static void Main()
         {
             
-            screenSize = new ParticlePos(800,800);
+            screenSize = new(800,800);
 
-            world = new ParticleWorld(new ParticlePos(80,80),screenSize);
+            world = new(new ParticlePos(400,400),screenSize);
 
-            gameTick = new Timer(0.2f, restart: true);
+            gameTick = new Timer(0.1f, restart: true);
 
             StartGame();
         }
 
         private static void StartGame()
         {
-            Raylib.InitWindow(screenSize.X, screenSize.Y, "Game of Life");
+            Raylib.InitWindow(screenSize.x, screenSize.y, "Game of Life");
 
             Color clearColor = Color.Black;
 
@@ -133,7 +135,7 @@ namespace Main
 
             if (Raylib.IsKeyDown(KeyboardKey.R))
             {
-                gameTick.pause= false;  
+                gameTick.pause = false;  
             }
 
             if (Raylib.IsKeyPressed(KeyboardKey.C))

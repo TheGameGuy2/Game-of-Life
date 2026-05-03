@@ -7,35 +7,37 @@ namespace Particles
 
     public class ParticlePos
     {
-        public int X;  
-        public int Y;
+        public int x;  
+        public int y;
+
         public ParticlePos(int x=0, int y=0)
         {
-            X = x;
-            Y = y;
+            this.x = x;
+            this.y = y;
         }
 
         //converts a float vector to a ParticlePos object
         public static ParticlePos FromVector(Vector2 vector)
         {
-            ParticlePos pos = new ParticlePos();
-            
-            pos.X=(int)vector.X;
-            pos.Y=(int)vector.Y;
+            ParticlePos pos = new ParticlePos
+            {
+                x = (int)vector.X,
+                y = (int)vector.Y
+            };
             return pos;
         }
 
         public ParticlePos Copy()
         {
-            return new ParticlePos(X, Y);
+            return new ParticlePos(x, y);
         }
 
         //calculates the (rounded) mouse position in the world grid.
         public static ParticlePos MouseToWorldPoint(Vector2 mousePos,ParticlePos screenSize,ParticlePos worldSize)
         {
             
-            int xPos = (int)Math.Round(mousePos.X/(screenSize.X/worldSize.X));
-            int yPos = (int)Math.Round(mousePos.Y / (screenSize.Y/worldSize.Y));
+            int xPos = (int)Math.Round(mousePos.X/(screenSize.x/worldSize.x));
+            int yPos = (int)Math.Round(mousePos.Y / (screenSize.y/worldSize.y));
             return new ParticlePos(xPos,yPos);
         }
     }
@@ -44,7 +46,7 @@ namespace Particles
     {
         //the current world state, true -> cell is alive, false -> cell is dead 
         private bool[,] worldArray;
-        
+        private bool[,] bufferArray;
 
         public ParticlePos worldSize {  get; private set; }
 
@@ -60,11 +62,12 @@ namespace Particles
         //Constructor
         public ParticleWorld(ParticlePos worldSize,ParticlePos screenSize)
         {
-            worldArray = new bool[worldSize.Y,worldSize.X];
+            worldArray = new bool[worldSize.y, worldSize.x];
+            bufferArray = new bool[worldSize.y, worldSize.x];
 
             this.worldSize = worldSize;
             
-            particleSize = new ParticlePos(screenSize.X/worldSize.X,screenSize.Y/worldSize.Y); 
+            particleSize = new ParticlePos(screenSize.x/worldSize.x,screenSize.y/worldSize.y); 
             
         }
 
@@ -95,7 +98,7 @@ namespace Particles
                 {
                     if(worldArray[y, x]==true)
                     {
-                        Raylib.DrawRectangle(x*particleSize.X,y*particleSize.Y,particleSize.X,particleSize.Y,cellColor);
+                        Raylib.DrawRectangle(x*particleSize.x,y*particleSize.y,particleSize.x,particleSize.y,cellColor);
                         //Raylib.DrawRectangleGradientEx(new Rectangle(x * particleSize.X, y * particleSize.Y, particleSize.X, particleSize.Y), Color.Orange, Color.Lime, Color.Blue, Color.Yellow);
                         //^--- This is a graphics test. It just changes the color of the rect that is drawn. Remove old drawing code and uncomment to see for yourself.
                     }
@@ -113,9 +116,8 @@ namespace Particles
         //Simulates one iterration of the World
         public void Iteration()
         {
-            
-            bool[,] nextState = new bool[worldSize.Y,worldSize.X];
-            
+            bool[,] nextState = bufferArray;
+           
 
             ParticlePos currentParticle = new ParticlePos();
 
@@ -123,24 +125,23 @@ namespace Particles
 
             for(int y = 0; y < worldArray.GetLength(0); y++)
             {
-                currentParticle.Y= y;
+                currentParticle.y = y;
                 for(int x = 0;x < worldArray.GetLength(1); x++)
                 {
-                    currentParticle.X = x;
+                    currentParticle.x = x;
 
                     //checks if the position of the current part. is not on the "border"
                     if(ValidatePos(currentParticle))
                     {
                         int neighbourCount = GetNeighbours(currentParticle);
 
-                        bool currentValue = worldArray[currentParticle.Y, currentParticle.X];
+                        bool currentValue = worldArray[currentParticle.y, currentParticle.x];
 
-                        bool newValue = defaultRuleSet(neighbourCount, currentValue);
+                        bool newValue = DefaultRuleSet(neighbourCount, currentValue);
                         //applies the rule set to the current value.
 
+                        nextState[currentParticle.y, currentParticle.x] = newValue;
                         
-                        nextState[currentParticle.Y, currentParticle.X] = newValue;
-                        //sets the next state of the particle.
 
 
 
@@ -148,31 +149,13 @@ namespace Particles
                 }
             }
             
+            bufferArray = worldArray;
             worldArray = nextState;
 
         }
 
-        
-        private bool customRuleSet(int neighbours, bool currentValue)
-        {
-            if(neighbours == 0)
-            {
-                return false;
-            }
-            else if(neighbours<=3)
-            {
-                return true;
-            }
-            else if(neighbours>3) 
-            {
-                 return false;
-            }
-            
-            return false;
-        }
-
         //the default conways game of life rule set.
-        private bool defaultRuleSet(int neighbours,bool currentValue)
+        private bool DefaultRuleSet(int neighbours, bool currentValue)
         {
             /*
              * Conway's GOL Rules
@@ -204,7 +187,7 @@ namespace Particles
         //Gets all live neigbours at the given position. 
         private int GetNeighbours(ParticlePos pos)
         {
-            int neighbourCount=0; 
+            int neighbourCount = 0; 
             /*
              * Starting at top-left, going to bottom-right
              * tl X  X   | Y = -1 X = -1 ... 1 
@@ -216,16 +199,16 @@ namespace Particles
              * C -> the given position
              * 
              */
-            for(int y = pos.Y - 1; y <= pos.Y + 1; y++)
+            for(int y = pos.y - 1; y <= pos.y + 1; y++)
             {
-                for(int x = pos.X - 1; x <= pos.X + 1; x++)
+                for(int x = pos.x - 1; x <= pos.x + 1; x++)
                 {
-                    if(x==pos.X && y == pos.Y)
+                    if(x == pos.x && y == pos.y)
                     {
                         //loop is at the current particle.
                         continue;
                     }
-                    if (worldArray[y,x]==true)
+                    if (worldArray[y,x] == true)
                     {
                         //neighbour is alive
                         neighbourCount++;
@@ -240,7 +223,7 @@ namespace Particles
         private bool ValidatePos(ParticlePos worldPos)
         {
             //checks if position is in bounds of the world. The last and first positions are counted as the border and are not valid.
-            if (worldPos.X >= 1 && worldPos.Y >= 1 && worldPos.Y < worldSize.Y-1 && worldPos.X < worldSize.X-1)
+            if (worldPos.x >= 1 && worldPos.y >= 1 && worldPos.y < worldSize.y-1 && worldPos.x < worldSize.x-1)
             {
                 //position is valid
                 return true;
@@ -255,7 +238,7 @@ namespace Particles
         {
             if (ValidatePos(worldPos))
             {
-                worldArray[worldPos.Y, worldPos.X] = true;
+                worldArray[worldPos.y, worldPos.x] = true;
             }
 
         }
